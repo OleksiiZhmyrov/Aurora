@@ -23,7 +23,11 @@ class ConfluencePage(object):
         self.soup = BeautifulSoup(self.get_content())
 
     def get_content(self):
-        return self.data.get('content')
+        try:
+            return self.data.get('content')
+        except KeyError:
+            LOGGER.error('Confluence page does not have content')
+            return None
 
     def set_content(self, content):
         self.data.update({'content': str(content)})
