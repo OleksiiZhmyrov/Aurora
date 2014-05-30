@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Outdated Issues{% endblock %}
+{% block content %}
+
+<div class="container" style="width: 95%;">
+    <h1 class="ci-header-title">Outdated Issues</h1>
+    <table class="table table-bordered table-ci">
+        <thead>
+            <tr>
+                <th style="text-align: center;">Key</th>
+                <th style="text-align: center;">Summary</th>
+                <th style="text-align: center;">Team</th>
+                {# <th style="text-align: center;">Assignee</th> #}
+                <th style="text-align: center;">Points</th>
+                <th style="text-align: center;">Est. date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if not issues %}
+                <tr>
+                    <td colspan="5">
+                        No issues found
+                    </td>
+                </tr>
+            {% else %}
+                {% for issue in issues %}
+                    <tr {% if issue.outdated %}style="background: #ff0000; color: #ffffff;"{% endif %}>
+                        <td><a {% if issue.outdated %}style="color: #ffffff;"{% endif %}
+                               target="_blank"
+                               href="{{ browse_url }}{{ issue.key }}">{{ issue.key }}</a></td>
+                        <td>{{ issue.summary }}</td>
+                        <td>{{ issue.team }}</td>
+                        {# <td>{{ issue.assignee }}</td> #}
+                        <td>{{ issue.points }}</td>
+                        <td>{{ issue.est_date }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

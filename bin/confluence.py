@@ -1,11 +1,14 @@
 from xmlrpclib import Server
 
 from bs4 import BeautifulSoup
-
+from time import gmtime, strftime
 from logger import LOGGER
 
 from util import fail, format_date
+from database import DatabaseWrapper
+from stats import Stats
 from settings import COLOURS, CONFLUENCE_SETTINGS
+from confluence_templ import update_message, structured_macro, paragraph
 
 
 class ConfluenceSettings(object):
@@ -33,6 +36,9 @@ class ConfluencePage(object):
         self.data.update({'content': str(content)})
 
     def get_story_keys(self):
+        return [item['key'] for item in self.get_stories_data()]
+
+    def get_stories_data(self):
         result = []
         for row in self.soup.findAll('tr')[1:]:
             if len(row.findAll('td')) != 12:
@@ -41,7 +47,10 @@ class ConfluencePage(object):
             if cols[2].find('a') is None:
                 fail('story key is not a hyperlink')
             else:
-                result.append(str(cols[2].find("a").text))
+                result.append({
+                    'key': str(cols[2].find("a").text),
+                    'status': str(cols[6].text.encode('ascii', 'ignore'))
+                })
         LOGGER.info('Table contains %s stories' % len(result))
         return result
 
@@ -54,7 +63,11 @@ class ConfluencePage(object):
                 ConfluencePage.__update_cell(row, 5, None, jira_issue.get_custom_field('is_dc'))
                 ConfluencePage.__update_cell(row, 7, None, jira_issue.reporter)
                 ConfluencePage.__update_cell(row, 8, None, jira_issue.get_custom_field('onshore_ba'))
-                ConfluencePage.__update_cell(row, 9, None, format_date(jira_issue.get_custom_field('est_date')))
+
+                est_date = jira_issue.get_custom_field('est_date')
+                if est_date != '':
+                    est_date = format_date(est_date)
+                ConfluencePage.__update_cell(row, 9, None, est_date)
 
         self.set_content(self.soup.find('table'))
 
@@ -82,6 +95,7 @@ class ConfluenceInstance(object):
     def __init__(self):
         self.settings = ConfluenceSettings()
         self.server = Server(self.settings.uri).confluence2
+        self.db = DatabaseWrapper()
         self.page = None
 
     def get_token(self):
@@ -101,4 +115,19 @@ class ConfluenceInstance(object):
         return self.page
 
     def save_page(self, page):
+        page = self.__attach_statistics(page)
         self.server.storePage(self.get_token(), page.data)
+
+    def __attach_statistics(self, page):
+        stats = Stats(self.db.get_all_issues()).get_result()
+        content = page.data['content']
+        message = paragraph(update_message(self.settings.login, strftime("%Y-%m-%d %H:%M:%S %z", gmtime())))
+        stat_info = paragraph(
+            structured_macro('Grey', '%s total' % stats['total']['count']) +
+            structured_macro('Blue', '%s ready' % stats['ready']['count']) +
+            structured_macro('Green', '%s pass' % stats['passed']['count']) +
+            structured_macro('Red', '%s fail' % stats['failed']['count'])
+        )
+        content = message + stat_info + content
+        page.data.update({'content': str(content)})
+        return page

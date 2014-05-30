@@ -13,6 +13,7 @@ JIRA_SETTINGS = {
     'password': '',
     'project': '',
     'uri': 'https://hostname:port/jira/rpc/soap/jirasoapservice-v2?WSDL',
+    'browse': 'https://hostname:port/jira/browse/',
 }
 
 CUSTOM_FIELDS = {

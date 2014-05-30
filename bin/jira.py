@@ -13,6 +13,7 @@ class JiraSettings(object):
         self.password = JIRA_SETTINGS['password']
         self.project = JIRA_SETTINGS['project']
         self.uri = JIRA_SETTINGS['uri']
+        self.browse = JIRA_SETTINGS['browse']
 
 
 class JiraIssue(object):
@@ -22,13 +23,15 @@ class JiraIssue(object):
         self.reporter = None
         self.summary = None
         self.status = None
+        self.dc_status = ''
         self.custom_fields = {}
 
-    def parse_args(self, key, reporter, summary, status, custom_fields):
+    def parse_args(self, key, reporter, summary, status, dc_status, custom_fields):
         self.key = key
         self.reporter = reporter
         self.summary = summary
         self.status = status
+        self.dc_status = dc_status
         self.custom_fields = custom_fields
 
     def parse_raw(self, raw):
@@ -97,5 +100,5 @@ class JiraInstance(object):
             issue = JiraIssue()
             issue.parse_raw(item)
             result.append(issue)
-            LOGGER.info('\t%s' % issue)
+            LOGGER.debug('\t%s' % issue)
         return result
