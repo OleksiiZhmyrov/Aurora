@@ -3,36 +3,16 @@ class Stats(object):
         self.issues = issues
 
     def __get_ready(self):
-        count = len([issue for issue in self.issues if issue.dc_status == 'READY'])
-        count_sp = sum([int(issue.get_custom_field('points')) for issue in self.issues if
-                        issue.get_custom_field('points') != '' and issue.dc_status == 'READY'])
-        percent = round(100.0 * count / int(self.__get_total()['count']), 0)
-        percent_sp = round(100.0 * count_sp / int(self.__get_total()['count_sp']), 0)
-        return self.__get_result_node(count, count_sp, percent, percent_sp)
+        return self.__get_result_sub_node('READY')
 
     def __get_passed(self):
-        count = len([issue for issue in self.issues if issue.dc_status == 'PASS'])
-        count_sp = sum([int(issue.get_custom_field('points')) for issue in self.issues if
-                        issue.get_custom_field('points') != '' and issue.dc_status == 'PASS'])
-        percent = round(100.0 * count / int(self.__get_total()['count']), 0)
-        percent_sp = round(100.0 * count_sp / int(self.__get_total()['count_sp']), 0)
-        return self.__get_result_node(count, count_sp, percent, percent_sp)
+        return self.__get_result_sub_node('PASS')
 
     def __get_failed(self):
-        count = len([issue for issue in self.issues if issue.dc_status == 'FAIL'])
-        count_sp = sum([int(issue.get_custom_field('points')) for issue in self.issues if
-                        issue.get_custom_field('points') != '' and issue.dc_status == 'FAIL'])
-        percent = round(100.0 * count / int(self.__get_total()['count']), 0)
-        percent_sp = round(100.0 * count_sp / int(self.__get_total()['count_sp']), 0)
-        return self.__get_result_node(count, count_sp, percent, percent_sp)
+        return self.__get_result_sub_node('FAIL')
 
     def __get_other(self):
-        count = len([issue for issue in self.issues if issue.dc_status == ''])
-        count_sp = sum([int(issue.get_custom_field('points')) for issue in self.issues if
-                        issue.get_custom_field('points') != '' and issue.dc_status == ''])
-        percent = round(100.0 * count / int(self.__get_total()['count']), 0)
-        percent_sp = round(100.0 * count_sp / int(self.__get_total()['count_sp']), 0)
-        return self.__get_result_node(count, count_sp, percent, percent_sp)
+        return self.__get_result_sub_node('')
 
     def __get_progress_bar(self):
         return {
@@ -47,6 +27,15 @@ class Stats(object):
             'count_sp': sum(
                 int(issue.get_custom_field('points')) for issue in self.issues if issue.get_custom_field('points') != '')
         }
+
+    def __get_result_sub_node(self, dc_status):
+        count = len([issue for issue in self.issues if issue.dc_status == dc_status])
+        count_sp = sum([int(issue.get_custom_field('points')) for issue in self.issues if
+                        issue.get_custom_field('points') != '' and issue.dc_status == dc_status])
+        percent = round(100.0 * count / int(self.__get_total()['count']), 0)
+        percent_sp = round(100.0 * count_sp / int(self.__get_total()['count_sp']), 0)
+        return self.__get_result_node(count, count_sp, percent, percent_sp)
+
 
     @staticmethod
     def __get_result_node(count, count_sp, percent, percent_sp):
