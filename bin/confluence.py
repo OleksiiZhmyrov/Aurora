@@ -8,7 +8,8 @@ from util import fail, format_date
 from database import DatabaseWrapper
 from stats import Stats
 from settings import COLOURS, CONFLUENCE_SETTINGS
-from confluence_templ import update_message, structured_macro, paragraph
+from jira import JiraSettings
+from confluence_templ import *
 
 
 class ConfluenceSettings(object):
@@ -121,13 +122,36 @@ class ConfluenceInstance(object):
     def __attach_statistics(self, page):
         stats = Stats(self.db.get_all_issues()).get_result()
         content = page.data['content']
-        message = paragraph(update_message(self.settings.login, strftime("%Y-%m-%d %H:%M:%S %z", gmtime())))
-        stat_info = paragraph(
-            structured_macro('Grey', '%s total' % stats['total']['count']) +
-            structured_macro('Blue', '%s ready' % stats['ready']['count']) +
-            structured_macro('Green', '%s pass' % stats['passed']['count']) +
-            structured_macro('Red', '%s fail' % stats['failed']['count'])
+        message = structured_macro_info(
+            'Warning',
+            paragraph(update_message(self.settings.login, strftime("%Y-%m-%d %H:%M:%S %z", gmtime())))
         )
-        content = message + stat_info + content
+        to_go_count = stats['total']['count'] - stats['ready']['count'] - stats['passed']['count'] - stats['failed'][
+            'count']
+        stat_info = paragraph(
+            structured_macro_status('Grey', '%s total' % stats['total']['count']) +
+            structured_macro_status('Blue', '%s ready' % stats['ready']['count']) +
+            structured_macro_status('Green', '%s pass' % stats['passed']['count']) +
+            structured_macro_status('Red', '%s fail' % stats['failed']['count']) +
+            structured_macro_status_subtle('%s to go' % to_go_count)
+        )
+
+        items_for_list = []
+        for issue in self.db.get_outdated_issues():
+            items_for_list.append({
+                'link': JiraSettings().browse + issue.key,
+                'title': issue.key,
+                'comment': ' (%s)' % issue.est_date,
+            })
+
+        if len(items_for_list) > 0:
+            outdated = paragraph(
+                structured_macro_expand('%s outdated issues' % len(items_for_list),
+                                        unordered_list_with_hrefs(items_for_list))
+            )
+        else:
+            outdated = ''
+
+        content = message + stat_info + outdated + content
         page.data.update({'content': str(content)})
         return page
