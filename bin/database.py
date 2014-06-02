@@ -60,6 +60,10 @@ class DatabaseWrapper:
         return result
 
     @staticmethod
+    def get_dc_issues():
+        return [issue for issue in DatabaseWrapper.get_all_issues() if issue.get_custom_field('is_dc') == 'Yes']
+
+    @staticmethod
     def get_outdated_issues():
         result = []
         now = datetime.now().date()

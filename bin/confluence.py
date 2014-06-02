@@ -120,7 +120,7 @@ class ConfluenceInstance(object):
         self.server.storePage(self.get_token(), page.data)
 
     def __attach_statistics(self, page):
-        stats = Stats(self.db.get_all_issues()).get_result()
+        stats = Stats(self.db.get_dc_issues()).get_result()
         content = page.data['content']
         message = structured_macro_info(
             'Warning',
@@ -129,6 +129,7 @@ class ConfluenceInstance(object):
         to_go_count = stats['total']['count'] - stats['ready']['count'] - stats['passed']['count'] - stats['failed'][
             'count']
         stat_info = paragraph(
+            'Desk Check: ' +
             structured_macro_status('Grey', '%s total' % stats['total']['count']) +
             structured_macro_status('Blue', '%s ready' % stats['ready']['count']) +
             structured_macro_status('Green', '%s pass' % stats['passed']['count']) +
@@ -136,6 +137,11 @@ class ConfluenceInstance(object):
             structured_macro_status_subtle('%s to go' % to_go_count)
         )
 
+        content = message + stat_info + content
+        page.data.update({'content': str(content)})
+        return page
+
+    def __outdated_issues_block(self):
         items_for_list = []
         for issue in self.db.get_outdated_issues():
             items_for_list.append({
@@ -151,7 +157,4 @@ class ConfluenceInstance(object):
             )
         else:
             outdated = ''
-
-        content = message + stat_info + outdated + content
-        page.data.update({'content': str(content)})
-        return page
+        return outdated
