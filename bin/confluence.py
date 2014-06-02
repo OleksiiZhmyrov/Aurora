@@ -129,8 +129,8 @@ class ConfluenceInstance(object):
         to_go_count = stats['total']['count'] - stats['ready']['count'] - stats['passed']['count'] - stats['failed'][
             'count']
         stat_info = paragraph(
-            'Desk Check: ' +
-            structured_macro_status('Grey', '%s total' % stats['total']['count']) +
+            structured_macro_status('Grey', '%s total' % len(DatabaseWrapper.get_all_issues())) +
+            structured_macro_status('Grey', '%s desk check' % stats['total']['count']) +
             structured_macro_status('Blue', '%s ready' % stats['ready']['count']) +
             structured_macro_status('Green', '%s pass' % stats['passed']['count']) +
             structured_macro_status('Red', '%s fail' % stats['failed']['count']) +

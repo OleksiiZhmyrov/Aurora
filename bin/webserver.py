@@ -16,7 +16,7 @@ def home_page():
 
 @app.route('/progress')
 def progress_page():
-    stats = Stats(DatabaseWrapper.get_all_issues())
+    stats = Stats(DatabaseWrapper.get_dc_issues())
     return render_template('progress.html', statistics=stats.get_result())
 
 
