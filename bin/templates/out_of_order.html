@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Out of order{% endblock %}
+{% block content %}
+
+<div class="container" style="width: 95%; padding-top: 40%; text-align: center;">
+    <img src="{{ url_for('static', filename='loader.gif') }}" alt="progressbar"/>
+    <p>Hold tight! Database is being synced with Jira and Confluence.</p>
+</div>
+{% endblock %}

@@ -15,12 +15,14 @@ class Aurora(object):
         keys = page.get_story_keys()
         self.__db.clear()
 
+        self.__db.lock_database()
         for issue in self.__jira.get_issues(keys):
             self.__db.store_issue(issue)
             page.update_row(issue)
 
         self.__db.update_issue_status(page.get_stories_data())
         self.__kb.save_page(page)
+        self.__db.unlock_database()
 
 if __name__ == '__main__':
     aurora = Aurora()

@@ -16,8 +16,12 @@ def home_page():
 
 @app.route('/progress')
 def progress_page():
-    stats = Stats(DatabaseWrapper.get_dc_issues())
-    return render_template('progress.html', statistics=stats.get_result())
+    db = DatabaseWrapper()
+    if db.is_locked():
+        return render_template('out_of_order.html')
+    else:
+        stats = Stats(db.get_dc_issues())
+        return render_template('progress.html', statistics=stats.get_result())
 
 
 @app.route('/outdated')

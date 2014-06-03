@@ -2,7 +2,7 @@ from json import dumps as to_json
 from json import loads as from_json
 from datetime import datetime
 
-from peewee import Model, CharField, SqliteDatabase, TextField, DeleteQuery, DoesNotExist
+from peewee import Model, CharField, SqliteDatabase, TextField, DeleteQuery, DoesNotExist, BooleanField
 
 from jira import JiraIssue
 from logger import LOGGER
@@ -18,6 +18,10 @@ class BaseModel(Model):
         database = database
 
 
+class ServiceTable(BaseModel):
+    is_locked = BooleanField(default=False)
+
+
 class DbJiraIssues(BaseModel):
     key = CharField()
     summary = CharField()
@@ -31,6 +35,21 @@ class DatabaseWrapper:
     def __init__(self):
         if not DbJiraIssues.table_exists():
             DbJiraIssues.create_table()
+        if not ServiceTable.table_exists():
+            ServiceTable.create_table()
+            ServiceTable(is_locked=False).save()
+
+    @staticmethod
+    def lock_database():
+        ServiceTable.get().update(is_locked=True).execute()
+
+    @staticmethod
+    def unlock_database():
+        ServiceTable.get().update(is_locked=False).execute()
+
+    @staticmethod
+    def is_locked():
+        return ServiceTable.get().is_locked
 
     @staticmethod
     def store_issue(issue):
