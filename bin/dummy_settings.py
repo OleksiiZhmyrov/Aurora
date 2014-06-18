@@ -40,3 +40,4 @@ COLOURS = {
 }
 
 DATABASE_FILENAME = '../db.sqlite3'
+SPRINT_NAME = ''
