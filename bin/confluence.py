@@ -7,7 +7,7 @@ from logger import LOGGER
 from util import fail, format_date
 from database import DatabaseWrapper
 from stats import Stats
-from settings import COLOURS, CONFLUENCE_SETTINGS
+from settings import COLOURS, CONFLUENCE_SETTINGS, DC_STATUSES
 from jira import JiraSettings
 from confluence_templ import *
 
@@ -64,6 +64,14 @@ class ConfluencePage(object):
                 ConfluencePage.__update_cell(row, 5, None, jira_issue.get_custom_field('is_dc'))
                 ConfluencePage.__update_cell(row, 7, None, jira_issue.reporter)
                 ConfluencePage.__update_cell(row, 8, None, jira_issue.get_custom_field('onshore_ba'))
+
+                if jira_issue.get_custom_field('is_dc') != 'Yes':
+                    ConfluencePage.__update_cell(row, 6, None, ' ')
+                else:
+                    if jira_issue.status == 'completed' and row.findAll('td')[6].text not in DC_STATUSES:
+                        ConfluencePage.__update_cell(row, 6, ConfluencePage.__get_colour(jira_issue.status), 'Ready')
+                    if jira_issue.status == 'accepted' and row.findAll('td')[6].text != 'Pass':
+                        ConfluencePage.__update_cell(row, 6, ConfluencePage.__get_colour(jira_issue.status), 'Pass')
 
                 est_date = jira_issue.get_custom_field('est_date')
                 if est_date != '':

@@ -34,6 +34,8 @@ STATUS_CODES = {
     '6': 'in testing',
 }
 
+DC_STATUSES = ['Ready', 'Pass', 'Fail']
+
 COLOURS = {
     'in progress': 'rgb(255,128,0)',
     'completed': 'rgb(0,0,255)',

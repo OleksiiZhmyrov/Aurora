@@ -35,6 +35,7 @@ STRUCTURED_MACRO_INFO = '''
 UPDATE_MESSAGE = '''
 <p>Page automatically updated by {login} on {datetime}<br/>
     Columns marked with (*) has been filled automatically and will be overwritten if edited manually.<br/>
+    BA Desk Check Status has been updated automatically only for Completed(Ready) and Accepted(Pass) issues.<br/>
 </p>
 '''
 
