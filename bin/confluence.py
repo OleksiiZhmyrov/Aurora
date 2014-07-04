@@ -36,6 +36,9 @@ class ConfluencePage(object):
     def set_content(self, content):
         self.data.update({'content': str(content)})
 
+    def get_hash(self):
+        return abs(hash(self.soup.findAll('table')[0])) % (10 ** 8)
+
     def get_story_keys(self):
         return [item['key'] for item in self.get_stories_data()]
 
