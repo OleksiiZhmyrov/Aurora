@@ -22,7 +22,8 @@ def progress_page():
         return render_template('out_of_order.html')
     else:
         stats = Stats(db.get_dc_issues())
-        return render_template('progress.html', statistics=stats.get_result(), sprint=SPRINT_NAME)
+        defects = db.get_defect_count()
+        return render_template('progress.html', statistics=stats.get_result(), sprint=SPRINT_NAME, defects=defects)
 
 
 @app.route('/outdated')

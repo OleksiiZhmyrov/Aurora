@@ -4,7 +4,7 @@ from SOAPpy.WSDL import Proxy
 
 from logger import LOGGER
 
-from settings import JIRA_SETTINGS, CUSTOM_FIELDS, STATUS_CODES
+from settings import JIRA_SETTINGS, CUSTOM_FIELDS, STATUS_CODES, BACKLOG_DEFECTS_QUERY
 
 
 class JiraSettings(object):
@@ -88,6 +88,11 @@ class JiraInstance(object):
         token = self.proxy.login(self.settings.login, self.settings.password)
         return token
 
+    def get_backlog_defects_count(self):
+        request = BACKLOG_DEFECTS_QUERY
+        response = self.proxy.getIssuesFromJqlSearch(self.get_token(), request, Types.intType(1000))
+        return len(response)
+
     def get_issues(self, issues, limit=300):
         result = []
         keys = ','.join(issues)
@@ -95,10 +100,8 @@ class JiraInstance(object):
         LOGGER.debug(request)
         response = self.proxy.getIssuesFromJqlSearch(self.get_token(), request, Types.intType(limit))
 
-        LOGGER.info('%s Jira issues' % len(response))
         for item in response:
             issue = JiraIssue()
             issue.parse_raw(item)
             result.append(issue)
-            LOGGER.debug('\t%s' % issue)
         return result

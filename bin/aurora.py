@@ -21,6 +21,7 @@ class Aurora(object):
             page.update_row(issue)
 
         self.__db.update_issue_status(page.get_stories_data())
+        self.__db.update_defect_count(self.__jira.get_backlog_defects_count())
 
         updated_page_hash = page.get_hash()
 
