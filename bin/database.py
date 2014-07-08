@@ -2,7 +2,7 @@ from json import dumps as to_json
 from json import loads as from_json
 from datetime import datetime
 
-from peewee import Model, CharField, SqliteDatabase, TextField, DeleteQuery, DoesNotExist, BooleanField, IntegerField
+from peewee import Model, CharField, SqliteDatabase, TextField, DeleteQuery, DoesNotExist, BooleanField, IntegerField, DateTimeField
 
 from jira import JiraIssue
 from logger import LOGGER
@@ -21,6 +21,7 @@ class BaseModel(Model):
 class ServiceTable(BaseModel):
     is_locked = BooleanField(default=False)
     defect_count = IntegerField(default=0)
+    unlock_datetime = DateTimeField(null=True)
 
 
 class DbJiraIssues(BaseModel):
@@ -46,7 +47,7 @@ class DatabaseWrapper:
 
     @staticmethod
     def unlock_database():
-        ServiceTable.get().update(is_locked=False).execute()
+        ServiceTable.get().update(is_locked=False, unlock_datetime=datetime.now()).execute()
 
     @staticmethod
     def update_defect_count(count):
@@ -59,6 +60,10 @@ class DatabaseWrapper:
     @staticmethod
     def get_defect_count():
         return ServiceTable.get().defect_count
+
+    @staticmethod
+    def get_unlock_datetime():
+        return ServiceTable.get().unlock_datetime
 
     @staticmethod
     def store_issue(issue):

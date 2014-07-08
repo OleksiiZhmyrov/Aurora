@@ -48,7 +48,6 @@ class Stats(object):
 
     def get_result(self):
         return {
-            'datetime': None,
             'ready': self.__get_ready(),
             'total': self.__get_total(),
             'passed': self.__get_passed(),

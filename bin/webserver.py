@@ -5,6 +5,7 @@ from database import DatabaseWrapper
 from stats import Stats
 from jira import JiraSettings
 from settings import SPRINT_NAME
+from time import strftime
 
 app = Flask(__name__)
 app.debug = True
@@ -23,7 +24,8 @@ def progress_page():
     else:
         stats = Stats(db.get_dc_issues())
         defects = db.get_defect_count()
-        return render_template('progress.html', statistics=stats.get_result(), sprint=SPRINT_NAME, defects=defects)
+        datetime = db.get_unlock_datetime().strftime("%Y-%m-%d %H:%M:%S %z")
+        return render_template('progress.html', statistics=stats.get_result(), sprint=SPRINT_NAME, defects=defects, datetime=datetime)
 
 
 @app.route('/outdated')
@@ -34,8 +36,6 @@ def outdated_page():
     else:
         browse_url = JiraSettings().browse
         return render_template('outdated.html', issues=db.get_outdated_issues(), browse_url=browse_url, sprint=SPRINT_NAME)
-
-
 
 
 if __name__ == '__main__':
